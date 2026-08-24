@@ -15,7 +15,10 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip3 install boto3'
+                sh '''
+                    python3 -m venv venv
+                    ./venv/bin/pip install boto3
+                '''
             }
         }
 
