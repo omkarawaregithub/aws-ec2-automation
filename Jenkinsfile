@@ -1,31 +1,44 @@
 pipeline {
-    agent any
 
-    triggers {
-        cron('H 22 * * *')
-    }
+    agent any
 
     stages {
 
-        stage('Checkout') {
+        stage('Clean Workspace') {
             steps {
-                git branch: 'main', url: 'https://github.com/omkarawaregithub/aws-ec2-automation.git'
+                cleanWs()
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Checkout') {
             steps {
-                sh '''
-                    python3 -m venv venv
-                    ./venv/bin/pip install boto3
-                '''
+                checkout scm
             }
         }
 
         stage('Stop EC2 Instances') {
             steps {
-                sh 'python3 stop_ec2.py'
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'awscreds']
+                ]) {
+                sh '~/ec2-venv/bin/python stop_ec2.py'
+                   }
             }
+        }
+    }
+    post {
+
+        success {
+            echo 'EC2 stop process completed successfully.'
+        }
+
+        failure {
+            echo 'EC2 stop process failed.'
+        }
+
+        always {
+            echo 'Pipeline execution completed.'
         }
     }
 }

@@ -1,28 +1,39 @@
 import boto3
 
-REGION = "ap-south-1"
+# Create EC2 client
+ec2 = boto3.client("ec2", region_name="ap-south-1")
 
-ec2 = boto3.client("ec2", region_name=REGION)
+# Get all running instances
+response = ec2.describe_instances(
+    Filters=[
+        {
+            "Name": "instance-state-name",
+            "Values": ["running"]
+        },
+        {
+            "Name": "tag:AutoStop",
+            "Values": ["true"]
+        }
+    ]
+)
 
-# EC2 instances that you want to stop
-instance_ids = [
-    "i-0c31d1fae439897ae",
-    "i-0378e3ec7e9182fdc"
-]
+instance_ids = []
 
-print("Instances to stop:")
+for reservation in response["Reservations"]:
+    for instance in reservation["Instances"]:
+        instance_ids.append(instance["InstanceId"])
 
-for instance_id in instance_ids:
-    print(instance_id)
+# Stop instances
+if instance_ids:
+    print("Running instances found:")
+    for instance_id in instance_ids:
+        print(instance_id)
 
-# Stop the specified instances
-response = ec2.stop_instances(InstanceIds=instance_ids)
+    print("\nStopping instances...")
 
-print("\nStop request sent successfully.")
+    ec2.stop_instances(InstanceIds=instance_ids)
 
-for instance in response["StoppingInstances"]:
-    print(
-        f"{instance['InstanceId']}: "
-        f"{instance['CurrentState']['Name']} -> "
-        f"{instance['TargetState']['Name']}"
-    )
+    print("All running EC2 instances have been stopped.")
+
+else:
+    print("No running EC2 instances found.")
