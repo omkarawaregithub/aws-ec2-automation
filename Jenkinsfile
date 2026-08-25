@@ -22,7 +22,7 @@ pipeline {
                     [$class: 'AmazonWebServicesCredentialsBinding',
                     credentialsId: 'awscrdes']
                 ]) {
-                sh '/home/ubuntu/testenv/bin/python stop_ec2.py'
+                sh '/var/lib/jenkins/ec2-venv/bin/python stop_ec2.py'
                    }
             }
         }
