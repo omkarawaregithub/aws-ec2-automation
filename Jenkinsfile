@@ -20,7 +20,7 @@ pipeline {
             steps {
                 withCredentials([
                     [$class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'awscreds']
+                    credentialsId: 'awscrdes']
                 ]) {
                 sh '~/ec2-venv/bin/python stop_ec2.py'
                    }
